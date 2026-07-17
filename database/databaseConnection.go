@@ -20,7 +20,7 @@ func DBinstance() *mongo.Client{
 	MongoDb:= os.Getenv("MONGODB_URL")
 	client,err:= mongo.Connect(options.Client().ApplyURI(MongoDb))
 	if err!=nil{
-		log.Fatal(err)
+		log.Fatal(err)	
 	}
 	ctx,cancel := context.WithTimeout(context.Background(),10*time.Second)
 	defer cancel()

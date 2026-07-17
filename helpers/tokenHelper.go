@@ -72,6 +72,7 @@ func UpdateAllTokens(signedtoken string, signedrefreshToken string, userid strin
 	)
 	if err != nil {
 		log.Panic(err)
+		return
 	}
 }
 

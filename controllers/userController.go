@@ -54,26 +54,30 @@ func Signup() gin.HandlerFunc{
 		validationErr := validate.Struct(user)
 		if validationErr!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":validationErr.Error()})
+			return
 		}
 
 		count,err:= userCollection.CountDocuments(ctx,bson.M{"email":user.Email})
 		if err!=nil{
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while checking the email"})
+			return
 		}
 
 		password := HashPassword(*user.Password)
 		user.Password = &password
 
-		count ,err1 := userCollection.CountDocuments(ctx,bson.M{"phone":user.Phone})
+		count ,err = userCollection.CountDocuments(ctx,bson.M{"phone":user.Phone})
 		defer cancel()
-		if err1!=nil{
+		if err!=nil{
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while checking phone number"})
+			return
 		}
 
 		if count>0{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"this emiail or phone number already exists"})
+			return
 		}
 
 		user.Created_at,_= time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
@@ -84,6 +88,7 @@ func Signup() gin.HandlerFunc{
 		token,refreshtoken,err:= helper.GenerateAllTokens(*user.Email,*user.First_name,*user.Last_name,*user.User_type,*&user.User_id)
 		if err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"user already exists"})
+			return
 		}
 		user.Token = &token
 		user.Refresh_token = &refreshtoken
@@ -125,6 +130,7 @@ func Login() gin.HandlerFunc{
 
 		if Founduser.Email == nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"user not found"})
+			return
 
 		}
 		token,refreshToken,_:=helper.GenerateAllTokens(*Founduser.Email,*Founduser.First_name,*Founduser.Last_name,*Founduser.User_type,*&Founduser.User_id)
@@ -177,6 +183,7 @@ func Getusers() gin.HandlerFunc{
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while listing user items"})
+			return
 		}
 		var allUsers []bson.M
 		if err = result.All(ctx,&allUsers); err!=nil{
