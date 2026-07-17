@@ -26,7 +26,7 @@ func main(){
 		c.JSON(200,gin.H{"success":"Access Granted To api-2"})
 	})
 
-	router.Run(":",port)
+	router.Run(":"+port)
 
 
 }
